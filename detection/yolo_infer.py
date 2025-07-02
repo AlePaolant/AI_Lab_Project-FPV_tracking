@@ -1,8 +1,8 @@
 from ultralytics import YOLO
 
-model = YOLO("yolov8n.pt")  # Usa yolov8s.pt o altri se vuoi più qualità??
+model = YOLO("yolov8n.pt")  # Sostituire con quello custom / yolov8s
 
-source = "../data/raw/bici-01.mp4"
+source = "../data/raw/bici-02.mp4"
 
 # Inferenza
 results = model(source, save=True, save_txt=True, conf=0.4)
