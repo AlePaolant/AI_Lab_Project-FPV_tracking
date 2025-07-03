@@ -1,9 +1,16 @@
+# Ignora DS_Store Apple
 .DS_Store
 **/.DS_Store
+
+# Ignora pycache
+__pycache__/
+**/__pycache__/
 
 # Ignora i risultati della detection yolo
 detection/runs/*
 
-# Ignora i frames vari per train e valid
-data/frames/train/*
-data/frames/valid/*
+# Ignora frames di test
+data/frames/
+
+# Ignora output SORT
+tracking/outputs/

@@ -2,9 +2,9 @@ from ultralytics import YOLO
 
 # CONFIG
 MODEL_PATH = "detection/best.pt"        # modello fine-tunato
-SOURCE = "data/raw/sci-01.mp4"         # video INPUT
+SOURCE = "data/raw/bici-01.mp4"         # video INPUT
 IMG_SIZE = 960                          # dimensione input
-CONF_THRESH = 0.4                       # confidenza minima
+CONF_THRESH = 0.6                       # confidenza minima
 SAVE_DIR = "detection/runs/detect"      # directory output
 
 
@@ -17,6 +17,7 @@ def main():
         source=SOURCE,
         imgsz=IMG_SIZE,
         conf=CONF_THRESH,
+        iou=0.4,
         save=True,
         save_txt=True,
         save_crop=False,
