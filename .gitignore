@@ -1,2 +1,9 @@
 .DS_Store
 **/.DS_Store
+
+# Ignora i risultati della detection yolo
+detection/runs/*
+
+# Ignora i frames vari per train e valid
+data/frames/train/*
+data/frames/valid/*

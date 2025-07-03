@@ -1,14 +1,29 @@
 from ultralytics import YOLO
 
-model = YOLO("yolov8n.pt")  # Sostituire con quello custom / yolov8s
+# CONFIG
+MODEL_PATH = "detection/best.pt"        # modello fine-tunato
+SOURCE = "data/raw/sci-01.mp4"         # video INPUT
+IMG_SIZE = 960                          # dimensione input
+CONF_THRESH = 0.4                       # confidenza minima
+SAVE_DIR = "detection/runs/detect"      # directory output
 
-source = "../data/raw/bici-02.mp4"
 
-# Inferenza
-results = model(source, save=True, save_txt=True, conf=0.4)
+def main():
+    # Carica modello
+    model = YOLO(MODEL_PATH)
 
-# results è una lista, uno per ogni frame
-for result in results:
-    print(result.boxes.xyxy)     # bounding box [x1, y1, x2, y2]
-    print(result.boxes.conf)     # confidenza
-    print(result.boxes.cls)      # classe (intero)
+    # Fai prediction
+    results = model.predict(
+        source=SOURCE,
+        imgsz=IMG_SIZE,
+        conf=CONF_THRESH,
+        save=True,
+        save_txt=True,
+        save_crop=False,
+        project=SAVE_DIR
+    )
+
+    print(f"Inference completata! Risultati salvati in: {SAVE_DIR}")
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 6
+names: ['bicycle', 'cow', 'horse', 'motorbike', 'person', 'quad']
+
+roboflow:
+  workspace: objectdetlabia
+  project: fpv-tracking
+  version: 3
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/objectdetlabia/fpv-tracking/dataset/3
