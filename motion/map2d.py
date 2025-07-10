@@ -1,19 +1,46 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import csv
+import random
 
 class Map2D:
     def __init__(self):
         self.positions = []
-        self.objects = []
+        self.orientations = []
+        self.objects_per_frame = {}
 
     def add_position(self, pos):
         self.positions.append(np.array(pos))
-        self.objects.append([])  # crea lista vuota per oggetti in quel frame
+        if len(self.positions) >= 2:
+            dx = self.positions[-1][0] - self.positions[-2][0]
+            dy = self.positions[-1][1] - self.positions[-2][1]
+            angle = np.arctan2(dy, dx) + np.pi/2  # aggiusta per gli orbit FPV
+            self.orientations.append(angle)
+        elif len(self.positions) == 1:
+            self.orientations.append(0.0)
 
-    def add_objects_at_frame(self, frame_idx, objects):
-        self.objects[frame_idx] = objects
+    def load_tracking_data(self, csv_path, frame_width=1280):
+        self.objects_per_frame = {}
+        with open(csv_path) as f:
+            reader = csv.reader(f)
+            next(reader)  # skip header
+            for row in reader:
+                try:
+                    frame_str = row[0]
+                    frame_idx = int(frame_str.replace("frame_","").replace(".jpg",""))
+                    obj_id = int(row[1])
+                    x1, y1, x2, y2 = map(int, row[2:6])
 
-    def plot(self, elapsed_time=None):
+                    x_center = (x1 + x2) / 2
+                    bbox_height = y2 - y1
+
+                    if frame_idx not in self.objects_per_frame:
+                        self.objects_per_frame[frame_idx] = []
+                    self.objects_per_frame[frame_idx].append((x_center, bbox_height, obj_id))
+                except:
+                    continue  # skip righe problematiche
+
+    def plot(self, elapsed_time=None, W=1280):
         positions = np.array(self.positions)
         plt.figure(figsize=(12,8))
         ax = plt.gca()
@@ -22,24 +49,47 @@ class Map2D:
                  color='red', linestyle='-', linewidth=2, marker='o',
                  label='Drone trajectory')
 
-        # Plot oggetti
-        import random
         colors = {}
-        for idx, objs in enumerate(self.objects):
+        forward_radius = 50.0
+        side_offset = 150.0  # quanto traslare TUTTA la bolla lateralmente (a destra del drone)
+
+        for idx in range(len(self.positions)):
             base_pos = positions[idx]
-            for obj in objs:
-                xoff, yoff, obj_id = obj
+            angle_cam = self.orientations[min(idx, len(self.orientations)-1)]
+            objs = self.objects_per_frame.get(idx, [])
+
+            # offset frontale sempre uguale
+            forward_x = forward_radius * np.cos(angle_cam - np.pi/2)
+            forward_y = forward_radius * np.sin(angle_cam - np.pi/2)
+
+            # offset laterale fisso PER TUTTI
+            lateral_x = -side_offset * np.cos(angle_cam)
+            lateral_y = -side_offset * np.sin(angle_cam)
+
+            for (x_center, bbox_height, obj_id) in objs:
+                final_x = base_pos[0] + forward_x + lateral_x
+                final_y = base_pos[1] + forward_y + lateral_y
+
                 if obj_id not in colors:
                     colors[obj_id] = [random.random(), random.random(), random.random()]
                 color = colors[obj_id]
-                plt.plot(base_pos[0]+xoff, base_pos[1]+yoff, marker='o', markersize=6, color=color)
+                plt.plot(final_x, final_y, marker='o', markersize=6, color=color)
+
+
+
+
+
+
+
+
+
+
 
         plt.xlabel("X", fontsize=12, color='white')
         plt.ylabel("Y", fontsize=12, color='white')
-        plt.title("Drone Map with Tracked Objects", fontsize=16, color='white')
+        plt.title("2D Map with FPV Drone Trajectory and Projected Objects", fontsize=16, color='white')
         plt.grid(True, linestyle='--', alpha=0.5, color='white')
         plt.axis('equal')
-
         ax.tick_params(axis='x', colors='white')
         ax.tick_params(axis='y', colors='white')
         ax.spines['top'].set_visible(False)
