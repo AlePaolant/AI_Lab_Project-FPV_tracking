@@ -1,13 +1,16 @@
 import matplotlib.pyplot as plt
+from matplotlib import cm
+from matplotlib.colors import to_hex
+
 import numpy as np
 import csv
-import random
 
 class Map2D:
     def __init__(self):
         self.positions = []
         self.orientations = []
         self.objects_per_frame = {}
+        self.all_ids = set()
 
     def add_position(self, pos):
         self.positions.append(np.array(pos))
@@ -34,6 +37,7 @@ class Map2D:
                     x_center = (x1 + x2) / 2
                     bbox_height = y2 - y1
 
+                    self.all_ids.add(obj_id)
                     if frame_idx not in self.objects_per_frame:
                         self.objects_per_frame[frame_idx] = []
                     self.objects_per_frame[frame_idx].append((x_center, bbox_height, obj_id))
@@ -48,8 +52,9 @@ class Map2D:
         plt.plot(positions[:,0], positions[:,1],
                  color='red', linestyle='-', linewidth=2, marker='o',
                  label='Drone trajectory')
-
-        colors = {}
+        
+        palette = [to_hex(c) for c in cm.nipy_spectral(np.linspace(0, 1, 20))]
+        
         forward_radius = 50.0
         side_offset = 150.0  # quanto traslare TUTTA la bolla lateralmente (a destra del drone)
 
@@ -58,11 +63,11 @@ class Map2D:
             angle_cam = self.orientations[min(idx, len(self.orientations)-1)]
             objs = self.objects_per_frame.get(idx, [])
 
-            # offset frontale sempre uguale
+            # offset frontale
             forward_x = forward_radius * np.cos(angle_cam - np.pi/2)
             forward_y = forward_radius * np.sin(angle_cam - np.pi/2)
 
-            # offset laterale fisso PER TUTTI
+            # offset laterale
             lateral_x = -side_offset * np.cos(angle_cam)
             lateral_y = -side_offset * np.sin(angle_cam)
 
@@ -70,20 +75,18 @@ class Map2D:
                 final_x = base_pos[0] + forward_x + lateral_x
                 final_y = base_pos[1] + forward_y + lateral_y
 
-                if obj_id not in colors:
-                    colors[obj_id] = [random.random(), random.random(), random.random()]
-                color = colors[obj_id]
-                plt.plot(final_x, final_y, marker='o', markersize=6, color=color)
+                color = palette[obj_id % len(palette)]
+                plt.plot(final_x, final_y, marker='o', markersize=4, color=color)
 
 
 
-
-
-
-
-
-
-
+        handles = []
+        labels = []
+        for obj_id in sorted(self.all_ids):
+            color = palette[obj_id % len(palette)]
+            handles.append(plt.Line2D([], [], color=color, marker='o', linestyle='None'))
+            labels.append(f'ID {obj_id}')
+        plt.legend(handles, labels, frameon=False, labelcolor='white')
 
         plt.xlabel("X", fontsize=12, color='white')
         plt.ylabel("Y", fontsize=12, color='white')
