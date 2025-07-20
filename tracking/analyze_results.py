@@ -1,39 +1,75 @@
 import csv
 from collections import defaultdict
 import matplotlib.pyplot as plt
+import numpy as np
 
-CSV_PATH = "tracking/outputs/tracking_data.csv"
+CSV_SORT = "tracking/outputs/tracking_data.csv"
+CSV_DEEPSORT = "tracking/outputs/tracking_data_deepsort.csv"
 
-# Lettura csv + costruzione dizionario
-tracks = defaultdict(list)
-
-with open(CSV_PATH , newline='') as csvfile:
-        reader =  csv.DictReader(csvfile)
+def process_csv(csv_path):
+    tracks = defaultdict(list)
+    with open(csv_path, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
         for row in reader:
-                track_id = int(row['track_id'])
-                frame = row['frame']
-                tracks[track_id].append(frame)
+            track_id = int(row['track_id'])
+            frame = int(row['frame'].replace('frame_', '').replace('.jpg', ''))
+            tracks[track_id].append(frame)
+    return tracks
 
-# Calcolo stats
-total_tracks = len(tracks) 
-lenghts = [len(frames) for frames in tracks.values()]
-avg_lenght = sum(lenghts) / total_tracks if total_tracks > 0 else 0
+def compute_stats(tracks, name=""):
+    total_tracks = len(tracks)
+    lengths = [len(frames) for frames in tracks.values()]
+    avg_length = np.mean(lengths) if total_tracks > 0 else 0
+    max_length = np.max(lengths) if total_tracks > 0 else 0
+    min_length = np.min(lengths) if total_tracks > 0 else 0
+    std_dev = np.std(lengths) if total_tracks > 0 else 0
 
-print(f"Numero totale di ID unici. {total_tracks}")
-print(f"Lunghezza media dei track: {avg_lenght:.2f} frame")
-for tid, frames in tracks.items():
-    print(f" - ID {tid} e' in {len(frames)} frame")
+    print(f"\nStatistiche per {name}")
+    print(f" - Numero totale di ID unici: {total_tracks}")
+    print(f" - Lunghezza media dei track: {avg_length:.2f} frame")
+    print(f" - Lunghezza massima dei track: {max_length} frame")
+    print(f" - Lunghezza minima dei track: {min_length} frame")
+    print(f" - Deviazione standard: {std_dev:.2f} frame")
 
-# Plot di visualizzazione 
-plt.figure(figsize=(10,6))
-for tid, frames in tracks.items():
-    x = [int(f.replace('frame_', '').replace('.jpg','')) for f in frames]
-    y = [tid]*len(x)
-    plt.plot(x, y, marker='o', label=f'ID {tid}')
-plt.xlabel("Frame")
-plt.ylabel("Track ID")
-plt.title("Evoluzione dei track ID nel tempo")
-plt.legend()
-plt.grid(True)
+    return lengths
+
+# Processa entrambi i CSV
+sort_tracks = process_csv(CSV_SORT)
+deepsort_tracks = process_csv(CSV_DEEPSORT)
+
+# Calcola statistiche
+sort_lengths = compute_stats(sort_tracks, "SORT")
+deepsort_lengths = compute_stats(deepsort_tracks, "DeepSORT")
+
+# Visualizzazione: tracking nel tempo
+fig, axs = plt.subplots(1, 2, figsize=(16, 6), sharey=True)
+
+# --- SORT
+for tid, frames in sort_tracks.items():
+    axs[0].plot(frames, [tid] * len(frames), marker='o', linestyle='-', markersize=3)
+axs[0].set_title("SORT - Evoluzione dei Track ID")
+axs[0].set_xlabel("Frame")
+axs[0].set_ylabel("Track ID")
+axs[0].grid(True)
+
+# --- DeepSORT
+for tid, frames in deepsort_tracks.items():
+    axs[1].plot(frames, [tid] * len(frames), marker='o', linestyle='-', markersize=3)
+axs[1].set_title("DeepSORT - Evoluzione dei Track ID")
+axs[1].set_xlabel("Frame")
+axs[1].grid(True)
+
+plt.tight_layout()
 plt.show()
 
+# Istogramma lunghezze tracce
+plt.figure(figsize=(10, 5))
+plt.hist(sort_lengths, bins=range(0, max(sort_lengths + deepsort_lengths) + 1), alpha=0.6, label="SORT")
+plt.hist(deepsort_lengths, bins=range(0, max(sort_lengths + deepsort_lengths) + 1), alpha=0.6, label="DeepSORT")
+plt.title("Distribuzione Lunghezze Tracce")
+plt.xlabel("Lunghezza traccia (n. frame)")
+plt.ylabel("Numero tracce")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
