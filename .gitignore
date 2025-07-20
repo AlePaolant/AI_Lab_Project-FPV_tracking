@@ -9,7 +9,7 @@ __pycache__/
 # Ignora i risultati della detection yolo
 detection/runs/*
 
-# Ignora frames di test
+# Ignora frames
 data/frames/
 
 # Ignora output SORT

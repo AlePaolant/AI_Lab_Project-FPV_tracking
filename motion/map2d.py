@@ -6,7 +6,7 @@ import numpy as np
 import csv
 
 class Map2D:
-    def __init__(self):
+    def __init__(self):                                             
         self.positions = []
         self.orientations = []
         self.objects_per_frame = {}
@@ -17,12 +17,12 @@ class Map2D:
         if len(self.positions) >= 2:
             dx = self.positions[-1][0] - self.positions[-2][0]
             dy = self.positions[-1][1] - self.positions[-2][1]
-            angle = np.arctan2(dy, dx) + np.pi/2  # aggiusta per gli orbit FPV
+            angle = np.arctan2(dy, dx) + np.pi/2                                # aggiusta per gli orbit FPV
             self.orientations.append(angle)
         elif len(self.positions) == 1:
             self.orientations.append(0.0)
 
-    def load_tracking_data(self, csv_path, frame_width=1280):
+    def load_tracking_data(self, csv_path, frame_width=1280):                   # carica i dati di tracking da CSV 
         self.objects_per_frame = {}
         with open(csv_path) as f:
             reader = csv.reader(f)
@@ -51,10 +51,11 @@ class Map2D:
         ax.set_facecolor('#121212')
         plt.plot(positions[:,0], positions[:,1],
                  color='red', linestyle='-', linewidth=2, marker='o',
-                 label='Drone trajectory')
+                 label='Traiettoria del Drone')
         
         palette = [to_hex(c) for c in cm.nipy_spectral(np.linspace(0, 1, 20))]
         
+        # SEZIONE CUSTOM
         forward_radius = 50.0
         side_offset = 150.0  # quanto traslare TUTTA la bolla lateralmente (a destra del drone)
 
@@ -90,7 +91,7 @@ class Map2D:
 
         plt.xlabel("X", fontsize=12, color='white')
         plt.ylabel("Y", fontsize=12, color='white')
-        plt.title("2D Map with FPV Drone Trajectory and Projected Objects", fontsize=16, color='white')
+        plt.title("Mappa 2D con Traiettoria del Drone e oggetti tracciati", fontsize=16, color='white')
         plt.grid(True, linestyle='--', alpha=0.5, color='white')
         plt.axis('equal')
         ax.tick_params(axis='x', colors='white')

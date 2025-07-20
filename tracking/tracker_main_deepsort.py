@@ -5,10 +5,10 @@ import csv
 from deep_sort_realtime.deepsort_tracker import DeepSort
 
 # Config
-YOLO_LABELS_PATH = "detection/runs/detect/predict5/labels"
-FRAMES_PATH = "data/frames/test_bici01"
-OUTPUT_PATH = "tracking/outputs/tracked_deepsort"
-CSV_PATH = "tracking/outputs/tracking_data_deepsort.csv"
+YOLO_LABELS_PATH = "detection/runs/detect/predict-moto01/predict/labels"
+FRAMES_PATH = "data/frames/demo-moto01"
+OUTPUT_PATH = "tracking/outputs/tracked_deepsort-moto01"
+CSV_PATH = "tracking/outputs/tracking_data_deepsort_moto01.csv"
 
 os.makedirs(OUTPUT_PATH, exist_ok=True)
 
@@ -27,9 +27,9 @@ with open(CSV_PATH, mode='w', newline='') as file:
         img = cv2.imread(img_path)
 
         # Ricava YOLO txt
-        num_str = frame_file.replace("frame_", "").replace(".jpg", "")
+        num_str = frame_file.replace(".jpg", "").split("_")[-1]
         frame_idx = int(num_str)
-        label_file = os.path.join(YOLO_LABELS_PATH, f"bici-01_{frame_idx+1}.txt")
+        label_file = os.path.join(YOLO_LABELS_PATH, f"moto-01_{frame_idx:04d}.txt")
         print(f"[DEBUG] Frame: {frame_file} → Label: {label_file}")
 
         detections = []

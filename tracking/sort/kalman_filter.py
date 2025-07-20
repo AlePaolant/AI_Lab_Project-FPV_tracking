@@ -1,17 +1,16 @@
 import numpy as np
 
 class KalmanBoxTracker:
-    count = 0
+    count = 0                                               # ID per ogni oggetto tracciato
 
     def __init__(self, bbox):
         """
         bbox: [x1, y1, x2, y2]
         """
-        # Crea stato iniziale
-        self.kf = self._init_kalman()
-        self.kf['x'][:4] = self._convert_bbox_to_z(bbox)
-        
-        self.time_since_update = 0
+        self.kf = self._init_kalman()                       # Crea una struttura iniziale
+        self.kf['x'][:4] = self._convert_bbox_to_z(bbox)    # Imposta lo stato iniziale del filtro di Kalman con i primi 4 elementi
+                                                            # [x,y,w,h]
+        self.time_since_update = 0                          
         self.id = KalmanBoxTracker.count
         KalmanBoxTracker.count += 1
         self.history = []

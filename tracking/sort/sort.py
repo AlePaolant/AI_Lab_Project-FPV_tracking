@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.optimize import linear_sum_assignment
-from .kalman_filter import KalmanBoxTracker
+from sort.kalman_filter import KalmanBoxTracker
 
 def iou(bb_test, bb_gt):
     """

@@ -3,8 +3,8 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 import numpy as np
 
-CSV_SORT = "tracking/outputs/tracking_data.csv"
-CSV_DEEPSORT = "tracking/outputs/tracking_data_deepsort.csv"
+CSV_SORT = "tracking/outputs/tracking_data-mucche02.csv"
+CSV_DEEPSORT = "tracking/outputs/tracking_data_deepsort_mucche02.csv"
 
 def process_csv(csv_path):
     tracks = defaultdict(list)
@@ -12,7 +12,14 @@ def process_csv(csv_path):
         reader = csv.DictReader(csvfile)
         for row in reader:
             track_id = int(row['track_id'])
-            frame = int(row['frame'].replace('frame_', '').replace('.jpg', ''))
+            # Estrae numero frame da 'bici-03_0001.jpg'
+            try:
+                frame_str = row['frame'].replace('.jpg', '')
+                frame_num = ''.join(filter(str.isdigit, frame_str))
+                frame = int(frame_num)
+            except Exception as e:
+                print(f"Errore parsing frame: {row['frame']} → {e}")
+                continue
             tracks[track_id].append(frame)
     return tracks
 
@@ -59,17 +66,5 @@ axs[1].set_title("DeepSORT - Evoluzione dei Track ID")
 axs[1].set_xlabel("Frame")
 axs[1].grid(True)
 
-plt.tight_layout()
-plt.show()
-
-# Istogramma lunghezze tracce
-plt.figure(figsize=(10, 5))
-plt.hist(sort_lengths, bins=range(0, max(sort_lengths + deepsort_lengths) + 1), alpha=0.6, label="SORT")
-plt.hist(deepsort_lengths, bins=range(0, max(sort_lengths + deepsort_lengths) + 1), alpha=0.6, label="DeepSORT")
-plt.title("Distribuzione Lunghezze Tracce")
-plt.xlabel("Lunghezza traccia (n. frame)")
-plt.ylabel("Numero tracce")
-plt.legend()
-plt.grid(True)
 plt.tight_layout()
 plt.show()

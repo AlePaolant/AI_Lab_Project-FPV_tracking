@@ -1,10 +1,9 @@
 from motion_estimation_SIFT import estimate_motion_sift
 from motion_estimation_ORB import estimate_motion_orb
 from map2d import  Map2D
-import csv
+import numpy as np
 
-
-FRAMES_PATH = "data/frames/test_bici01"
+FRAMES_PATH = "data/frames/demo-mucche02"
 
 print("Seleziona il metodo:")
 print("0 - Annulla")
@@ -26,6 +25,11 @@ else:
     print ("Invalido - annullo.")
     exit()
 
+# Modifica mappa
+trajectory = np.array(trajectory)
+trajectory[:, 1] *= -1  # capovolge l'asse Y
+
+
 # crea mappa
 print("Creo mappa...")
 mappa = Map2D()
@@ -34,6 +38,6 @@ for pos in trajectory:
 
 # aggiungi oggetti tracciati
 print("Carico tracking data...")
-mappa.load_tracking_data("tracking/outputs/tracking_data.csv")
+mappa.load_tracking_data("tracking/outputs/tracking_data-mucche02.csv")
 
 mappa.plot(elapsed_time)

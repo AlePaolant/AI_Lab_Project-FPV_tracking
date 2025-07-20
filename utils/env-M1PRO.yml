@@ -1,0 +1,13 @@
+name: fpvtrack
+channels: 
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.10
+  - numpy
+  - matplotlib
+  - opencv
+  - pytorch::pytorch  
+  - pytorch::torchvision
+  - pytorch::torchaudio
+  - ultralytics

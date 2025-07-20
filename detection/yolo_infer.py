@@ -1,11 +1,11 @@
 from ultralytics import YOLO
 
 # CONFIG
-MODEL_PATH = "detection/best.pt"        # modello fine-tunato
-SOURCE = "data/raw/bici-01.mp4"         # video INPUT
+MODEL_PATH = "detection/best_train4.pt"        # modello fine-tunato
+SOURCE = "data/raw/bici-03.mp4"         # video INPUT
 IMG_SIZE = 960                          # dimensione input
 CONF_THRESH = 0.6                       # confidenza minima
-SAVE_DIR = "detection/runs/detect"      # directory output
+SAVE_DIR = "detection/runs/detect/predict-bici03"      # directory output
 
 
 def main():
