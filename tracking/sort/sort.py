@@ -2,12 +2,9 @@ import numpy as np
 from scipy.optimize import linear_sum_assignment
 from sort.kalman_filter import KalmanBoxTracker
 
-def iou(bb_test, bb_gt):
-    """
-    Calcola IoU tra due bbox [x1,y1,x2,y2]
-    """
-    xx1 = np.maximum(bb_test[0], bb_gt[0])
-    yy1 = np.maximum(bb_test[1], bb_gt[1])
+def iou(bb_test, bb_gt):                                                        # Calcola IoU tra due bbox [x1,y1,x2,y2]
+    xx1 = np.maximum(bb_test[0], bb_gt[0])                                      # Intersection over Union 
+    yy1 = np.maximum(bb_test[1], bb_gt[1])                                      # overlap tra la predict bbox e la bbox ground trouth
     xx2 = np.minimum(bb_test[2], bb_gt[2])
     yy2 = np.minimum(bb_test[3], bb_gt[3])
     w = np.maximum(0., xx2 - xx1)
@@ -17,24 +14,14 @@ def iou(bb_test, bb_gt):
               + (bb_gt[2]-bb_gt[0])*(bb_gt[3]-bb_gt[1]) - wh)
     return o
 
-class Sort:
-    # modificare min hits max age e iou threshold per mitigare problema tracking multi-oggetto
-    # max_age -> n max frame che un track può non essere associato a nessuna detection prima di essere eliminato
-    # se un oggetto scompare, rimane in memoria per max_age frame
-    # min_hits -> n min associamenti consecutivi che una traccia deve avere per essere considerata valida
-    # filtrare falsi positivi
-    #       valori originali max_age=5, min_hits=3, iou_threshold=0.3 
-
-    def __init__(self, max_age=10, min_hits=1, iou_threshold=0.2):
+class Sort: 
+    def __init__(self, max_age=10, min_hits=1, iou_threshold=0.2):              # param !! originali max_age=5, min_hits=3, iou_threshold=0.3
         self.max_age = max_age
         self.min_hits = min_hits
         self.iou_threshold = iou_threshold
         self.trackers = []
 
-    def update(self, dets):
-        """
-        dets: [[x1,y1,x2,y2], ...]
-        """
+    def update(self, dets):                                             # dets: [[x1,y1,x2,y2], ...]
         # Predict
         trks = np.array([trk.predict() for trk in self.trackers])
         if len(trks) == 0:
@@ -84,7 +71,7 @@ def associate_detections_to_trackers(dets, trks, iou_threshold=0.3):
         if t not in matched_indices[:,1]:
             unmatched_trks.append(t)
 
-    # Remove low IoU matches
+    # Rimuovi match IoU
     matches = []
     for m in matched_indices:
         if iou_matrix[m[0], m[1]] < iou_threshold:
